@@ -1,0 +1,126 @@
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css");
+@import url('https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css');
+@import url('custom.css');
+
+html,body{
+    height: 100%;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*LOGIN*/
+.form-container{
+    max-width: 400px;
+    padding: 1rem;
+}
+
+.eyes-slashnfill{
+    position: relative;
+}
+.eyes-slashnfill i{
+    position: absolute;
+    cursor: pointer;
+    font-size: 26px;
+    margin-top: -48px;
+    right: 15px;
+}
+/*LOGIN*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*ASSISTIDOS*/
+div.assistidos div div.card div.card-body table tr td:first-child{
+    font-weight: 600;
+    font-size: 1em;
+    padding-right: 1.5em;
+}
+/*ASSISTIDOS*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*TOP HEADER*/
+#tema-interruptor {
+    color: var(--bs-secondary);
+    font-size: 1rem;
+    cursor: pointer;
+}
+#tema-interruptor:hover {
+    color: var(--bs-primary);
+}
+/*TOP HEADER*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*RODAPE*/
+footer h4{
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+footer h5{
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 2rem;
+}
+footer p{
+    text-align: justify;
+}
+/*RODAPE*/
