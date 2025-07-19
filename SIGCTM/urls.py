@@ -36,7 +36,6 @@ urlpatterns = [
     
 
     path('usuarios/', include('usuario.urls')), 
-    path('assistidos/', include('assistido.urls')),
     path('notificacao/', include('notificacao.urls')),
     path('atividade/', include('atividade.urls')),
     path('oficios/', include('oficio.urls')),

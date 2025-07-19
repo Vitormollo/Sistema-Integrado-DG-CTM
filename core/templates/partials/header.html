@@ -1,0 +1,62 @@
+{% load static %}
+<header class=" bg-body-tertiary">
+        <div class="container">
+            <nav class="navbar navbar-expand-lg">
+                <a href="" class="navbar-brand d-lg-block d-none">
+                    <img src="{% static 'img/logo/logo.light.svg' %}" alt="" width="40px">
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <a href="" class="navbar-brand d-lg-none d-block">
+                    <img src="{% static 'img/logo/logo.light.svg' %}" alt="" width="40px">
+                </a>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    {% include 'partials/navtop.html' %}
+                </div>
+
+                <div class="d-flex align-items-center gap-3 ">
+                    <a class="d-none d-lg-flex" id="tema-interruptor" onclick="intTema()">
+                        <i class="bi bi-circle-half"></i>
+                    </a>
+                    <div class="dropdown text-end">
+                        <a href="" class="d-block link-body-emphasis text-decoration-none dropdown-toggle show"
+                            aria-expanded="true" data-bs-toggle="dropdown">
+                            <img src="{% static 'img/pfp/unknow.jpg' %}" alt="" width="35px" class="rounded-circle">
+                        </a>
+                        <ul class="dropdown-menu text-small"
+                            style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate3d(-100px, 40px, 0px);"
+                            data-popper-placement="bottom-start">
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-gear pe-2"></i>Configurações</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-cloud-arrow-up pe-2"></i>Backup</a>
+                            </li>
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-clock-history pe-2"></i>Atividade</a>
+                            </li>
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-bar-chart pe-2"></i>Estatísticas</a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="#">Sair</a></li>
+                        </ul>
+
+                        </ul>
+                    </div>
+                </div>
+
+            </nav>
+        </div>
+        <div class="container d-flex align-items-center justify-content-between">
+            <h6 class="text-muted">> Início</h6>
+            <ul class="nav gap-4 flex-nowrap overflow-auto small">
+                <li class="nav-item"><a href="#dvoffcanvas" class="link-secondary" data-bs-toggle="offcanvas"
+                        role="button" aria-controls="dvoffcanvas">Direito violado</a></li>
+                <div class="vr"></div>
+                <li class="nav-item"><a href="#rioffcanvas" class="link-secondary" data-bs-toggle="offcanvas"
+                        role="button" aria-controls="rioffcanvas">Regimento interno</a></li>
+                <div class="vr"></div>
+                <li class="nav-item"><a href="{% static 'pdf/eca_1ed.pdf' %}" target="_blank" class="link-secondary">ECA</a></li>
+            </ul>
+        </div>
+    </header>
