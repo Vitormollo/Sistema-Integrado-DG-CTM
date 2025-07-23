@@ -28,10 +28,10 @@
                         <ul class="dropdown-menu text-small"
                             style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate3d(-100px, 40px, 0px);"
                             data-popper-placement="bottom-start">
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-gear pe-2"></i>Configurações</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-cloud-arrow-up pe-2"></i>Backup</a>
+                            <li><a class="dropdown-item" href="{% url 'configuracao' %}"><i class="bi bi-gear pe-2"></i>Configurações</a></li>
+                            <li><a class="dropdown-item" href="{% url 'backup' %}"><i class="bi bi-cloud-arrow-up pe-2"></i>Backup</a>
                             </li>
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-clock-history pe-2"></i>Atividade</a>
+                            <li><a class="dropdown-item" href="{% url 'atividade:index' %}"><i class="bi bi-clock-history pe-2"></i>Atividade</a>
                             </li>
                             <li><a class="dropdown-item" href="#"><i class="bi bi-bar-chart pe-2"></i>Estatísticas</a>
                             </li>
@@ -48,7 +48,33 @@
             </nav>
         </div>
         <div class="container d-flex align-items-center justify-content-between">
-            <h6 class="text-muted">> Início</h6>
+            <h6 class="text-muted">> 
+                {% if page_title == "Início" %}
+                    Início
+                {% elif page_title == "Assistido" %}
+                    Assistido
+                {% elif page_title == "Assistidos" %}
+                    Assistidos
+                {% elif page_title == "Atendimento" %}
+                    Atendimento
+                {% elif page_title == "Atendimentos" %}
+                    Atendimentos
+                {% elif page_title == "Notificação" %}
+                    Notificação
+                {% elif page_title == "Ofício" %}
+                    Ofício
+                {% elif page_title == "Protocolo" %}
+                    Protocolo
+                {% elif page_title == "Atividade" %}
+                    Atividade
+                {% elif page_title == "Backup" %}
+                    Backup
+                {% elif page_title == "Configurações" %}
+                    Configurações
+                {% else %}
+                    Conselho Tutelar
+                {% endif %}
+            </h6>
             <ul class="nav gap-4 flex-nowrap overflow-auto small">
                 <li class="nav-item"><a href="#dvoffcanvas" class="link-secondary" data-bs-toggle="offcanvas"
                         role="button" aria-controls="dvoffcanvas">Direito violado</a></li>

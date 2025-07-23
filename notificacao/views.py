@@ -13,7 +13,10 @@ def home_view(request):
 
 
 def notificacao(request):
-    return render(request, 'notificacao/notificacao.html', {'pagina_atual': 'notificacao'})
+    return render(request, 'notificacao/notificacao.html', {
+        'pagina_atual': 'notificacao',
+        'page_title': 'Notificação'
+    })
 
 def dashboard_view(request):
     return render(request, 'index.html', {'pagina_atual': 'dashboard'})

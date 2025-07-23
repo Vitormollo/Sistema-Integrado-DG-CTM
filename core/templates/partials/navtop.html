@@ -1,36 +1,36 @@
 <ul class="navbar-nav nav nav-underline">
     <li class="nav-item">
-        <a class="nav-link active" aria-current="page" href="index.html">
+        <a class="nav-link {% if pagina_atual == 'dashboard' %}active{% endif %}" aria-current="page" href="{% url 'dashboard' %}">
             <i class="bi bi-house-fill pe-1"></i>
             Início
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="assistido.html">
+        <a class="nav-link {% if pagina_atual == 'assistidos' %}active{% endif %}" href="{% url 'assistido:assistidos' %}">
             <i class="bi bi-person-fill pe-1"></i>
             Assistido
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="#">
+        <a class="nav-link {% if pagina_atual == 'atendimento' %}active{% endif %}" href="{% url 'atendimento:atendimento' %}">
             <i class="bi bi-headset pe-1"></i>
             Atendimento
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="#">
+        <a class="nav-link {% if pagina_atual == 'notificacao' %}active{% endif %}" href="{% url 'notificacao:notificacao' %}">
             <i class="bi bi-bell-fill pe-1"></i>
             Notificação
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="#">
+        <a class="nav-link {% if pagina_atual == 'oficio' %}active{% endif %}" href="{% url 'oficio:oficios' %}">
             <i class="bi bi-briefcase-fill pe-1"></i>
             Ofício
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="#">
+        <a class="nav-link {% if pagina_atual == 'protocolo' %}active{% endif %}" href="{% url 'protocolo:protocolos' %}">
             <i class="bi bi-file-earmark-text pe-1"></i>
             Protocolo
         </a>

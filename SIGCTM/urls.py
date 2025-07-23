@@ -26,15 +26,8 @@ urlpatterns = [
 
 
     path('', views.home_view, name='home'),
-
-
-
-
-    
-
     path('dashboard/', views.dashboard_view, name='dashboard'),
-    
-
+    path('configuracao/', views.configuracao_view, name='configuracao'),
     path('usuarios/', include('usuario.urls')), 
     path('notificacao/', include('notificacao.urls')),
     path('atividade/', include('atividade.urls')),

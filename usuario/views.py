@@ -11,8 +11,8 @@ def login_view(request):
             login(request, user)
             return redirect('dashboard')
         else:
-            return render(request, 'usuario/login.html', {'error': 'Usuário ou senha inválidos.'})
-    return render(request, 'usuario/login.html')
+            return render(request, 'usuario/login.html', {'error': 'Usuário ou senha inválidos.', 'page_title': 'Login'})
+    return render(request, 'usuario/login.html', {'page_title': 'Login'})
 
 
 @login_required
