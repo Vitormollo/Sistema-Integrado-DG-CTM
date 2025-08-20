@@ -72,3 +72,18 @@ class Telefone(models.Model):
 
     def __str__(self):
         return f"{self.numero_telefone} ({self.id_assist})"
+
+
+# Model Localizador
+class Localizador(models.Model):
+    id_local = models.AutoField(primary_key=True)
+    id_assist = models.ForeignKey(
+        Assistido,
+        on_delete=models.CASCADE,
+        related_name="localizadores"
+    )
+    dt_local = models.DateField(verbose_name="Data do Localizador")
+    destino_local = models.CharField(max_length=255, verbose_name="Destino do Localizador")
+
+    def __str__(self):
+        return f"Localizador {self.id_local} - Assistido: {self.id_assist}"  

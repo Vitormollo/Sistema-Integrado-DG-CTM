@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load assistido_extras %}
+{% block content %}
+<main class="container my-4">
+    <h1>Detalhes do Assistido: </h1>
+    <h2>{{ assistido.nmcompleto_assist }} <span class="badge text-bg-secondary">{{ assistido.numero_assist }}/{{ assistido.DTCADASTRO|date:'y' }}</span></h2>
+    <hr>
+    <div class="row">
+        <div class="col-6">
+            <p><strong>Nome:</strong> {{ assistido.nmcompleto_assist }}</p>
+            <p><strong>Número da pasta:</strong> {{ assistido.numero_assist }}/{{ assistido.DTCADASTRO|date:'y' }}</p>
+            <p><strong>Data de Nascimento:</strong> {{ assistido.dn_assist|date:'d/m/Y' }}</p>
+            <p><strong>Responsável:</strong> {{ assistido.nmresponsavel_assist }}{% if assistido.nmresponsavel_assist == 'outro' and assistido.outro_responsavel %} - {{ assistido.outro_responsavel }}{% endif %}</p>
+            <p><strong>Genitor:</strong> {{ assistido.nmgenitor_assist }}</p>
+            <p><strong>Genitora:</strong> {{ assistido.nmgenitora_assist }}</p>
+            <p><strong>Escola:</strong> {{ assistido.escola_assist }}</p>
+            <p><strong>Endereço:</strong> {{ assistido.rua_assist }}{% if assistido.numerocasa_assist %}, {{assistido.numerocasa_assist }}{% endif %}</p>
+            <p><strong>Bairro:</strong> {{ assistido.bairro_assist }}</p>
+            <p><strong>Cidade:</strong> {{ assistido.cidade_assist }}</p>
+            <p><strong>Gestante:</strong> {{ assistido.gestante_assist|yesno:'Sim,Não' }}</p>
+        </div>
+        <div class="col-6">
+            <h5>Informações Adicionais:</h5>
+            <h6>Telefones</h6>
+            {% for tel in assistido.telefones.all %}
+                <p>{{ tel.numero_telefone|format_telefone }}{% if tel.obs_telefone %} <small class="text-muted">- {{ tel.obs_telefone}}</small>{% endif %}</p>
+                {% empty %}
+                <p class="text-muted">Nenhum telefone cadastrado.</p>
+            {% endfor %}
+            <div class="d-flex align-items-center mb-2">
+                    <h6 class="mb-0 me-2">Irmãos:</h6>
+                    <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#addIrmaoModal">
+                            <i class="bi bi-person-plus"></i> Adicionar
+                    </button>
+            </div>
+            {% if irmaos %}
+                {% for irmao in irmaos %}
+                    <p>
+                        <a href="{% url 'assistido:detalhe' irmao.id_assist %}" target="_blank">
+                            {{ irmao.nmcompleto_assist }}
+                            <i class="bi bi-person-lines-fill"></i>
+                        </a>
+                    </p>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">Nenhum irmão cadastrado.</p>
+            {% endif %}
+
+            <!-- Modal Bootstrap para adicionar irmão -->
+            <div class="modal fade" id="addIrmaoModal" tabindex="-1" aria-labelledby="addIrmaoModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form method="post" action="{% url 'assistido:add_irmao' assistido.id_assist %}">
+                            {% csrf_token %}
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="addIrmaoModalLabel">Adicionar Irmão</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3 position-relative">
+                                    <label for="autocomplete-irmao" class="form-label">Digite o nome do irmão</label>
+                                    <input type="text" id="autocomplete-irmao" class="form-control" autocomplete="off" placeholder="Nome do irmão...">
+                                    <input type="hidden" name="irmao" id="irmao-id">
+                                    <div id="autocomplete-list" class="list-group position-absolute w-100" style="z-index: 1055;"></div>
+                                </div>
+                                <script>
+                                    // Lista de assistidos disponíveis (renderizada pelo Django)
+                                    // Lista de assistidos disponível para autocomplete
+                                    const assistidos = {{ assistidos_json|safe }};
+
+                                    const input = document.getElementById('autocomplete-irmao');
+                                    const hidden = document.getElementById('irmao-id');
+                                    const list = document.getElementById('autocomplete-list');
+                                    input.addEventListener('input', function() {
+                                        const val = this.value.toLowerCase();
+                                        list.innerHTML = '';
+                                        if (val.length < 2) return;
+                                        const matches = assistidos.filter(a => a.nome.toLowerCase().includes(val));
+                                        matches.forEach(a => {
+                                            const item = document.createElement('button');
+                                            item.type = 'button';
+                                            item.className = 'list-group-item list-group-item-action';
+                                            item.textContent = a.nome;
+                                            item.onclick = function() {
+                                                input.value = a.nome;
+                                                hidden.value = a.id;
+                                                list.innerHTML = '';
+                                            };
+                                            list.appendChild(item);
+                                        });
+                                    });
+                                    // Limpa sugestões ao clicar fora
+                                    document.addEventListener('click', function(e) {
+                                        if (!input.contains(e.target) && !list.contains(e.target)) {
+                                            list.innerHTML = '';
+                                        }
+                                    });
+                                </script>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-success" id="btn-add-irmao">
+                                    <i class="bi bi-person-plus"></i> Adicionar
+                                </button>
+                            </div>
+                            <!-- Toast de erro para seleção de irmão -->
+                            <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000;">
+                                <div id="irmao-toast" class="toast bg-danger text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                                    <div class="d-flex">
+                                        <div class="toast-body">
+                                            Selecione um irmão válido.
+                                        </div>
+                                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <script>
+                                // Impede envio se não houver irmão selecionado
+                                    document.getElementById('btn-add-irmao').closest('form').addEventListener('submit', function(e) {
+                                        var hidden = document.getElementById('irmao-id');
+                                        if (!hidden.value) {
+                                            e.preventDefault();
+                                            var toastEl = document.getElementById('irmao-toast');
+                                            var toast = new bootstrap.Toast(toastEl, { delay: 4000 });
+                                            toast.show();
+                                        }
+                                    });
+                            </script>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+</main>
+{% endblock %}
