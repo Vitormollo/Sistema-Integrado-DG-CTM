@@ -1,3 +1,21 @@
+from assistido.models import Localizador
+from django.utils import timezone
+
+# View para adicionar localização
+from django.views.decorators.http import require_POST
+
+@require_POST
+def add_local(request, id_assist):
+    assistido = get_object_or_404(Assistido, id_assist=id_assist)
+    from django.utils import timezone
+    destino_local = request.POST.get('destino_local')
+    if destino_local:
+        Localizador.objects.create(
+            id_assist=assistido,
+            dt_local=timezone.now().date(),
+            destino_local=destino_local
+        )
+    return redirect('assistido:detalhe', id_assist=assistido.id_assist)
 def detalhe_assistido(request, id_assist):
     import json
     assistido = get_object_or_404(Assistido, id_assist=id_assist)
@@ -16,11 +34,14 @@ def detalhe_assistido(request, id_assist):
     # Remove o próprio assistido se por acaso estiver na lista
     irmaos_ids.discard(assistido.id_assist)
     irmaos = Assistido.objects.filter(id_assist__in=irmaos_ids)
+    # Localizadores do assistido
+    localizadores = assistido.localizadores.all().order_by('-dt_local')
     return render(request, 'assistido/detalhe.html', {
         'assistido': assistido,
         'form': form,
         'assistidos_json': assistidos_json,
-        'irmaos': irmaos
+        'irmaos': irmaos,
+        'localizadores': localizadores
     })
 from django.shortcuts import get_object_or_404, redirect
 

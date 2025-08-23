@@ -16,8 +16,10 @@ html,body{
 
 
 
-
-
+.limit-card{
+    height: 250px;
+    background-color: red;
+}
 
 
 
@@ -83,8 +85,6 @@ div.assistidos div div.card div.card-body table tr td:first-child{
     color: var(--bs-primary);
 }
 /*TOP HEADER*/
-
-
 
 
 
