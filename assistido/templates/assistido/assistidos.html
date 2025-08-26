@@ -8,18 +8,39 @@
     <a href="" class="btn btn-primary me-2">
       <i class="bi bi-pencil pe-2"></i>Cadastrar Assistido
     </a>
-    <a href="" class="btn btn-outline-danger">
-      <i class="bi bi-trash pe-2"></i>Arquivo Morto
-    </a>
     <hr>
 
     <!-- Pesquisa -->
-    <form method="get" class="mb-3">
-      <div class="input-group">
-        <input type="text" class="form-control" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Pesquisar assistido...">
-        <button class="btn btn-outline-secondary" type="submit">Pesquisar</button>
+    <div class="card mb-4">
+      <div class="card-body container">
+        <form method="get" class="mb-3 row g-2">
+          <div class="input-group col-12">
+            <input type="text" class="form-control" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Pesquisar assistido...">
+            <button class="btn btn-outline-secondary" type="submit">Pesquisar</button>
+          </div>
+          <div class="col-4">
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input border-primary" id="showGestante">
+              <label class="form-check-label" for="showGestante"><i class="bi bi-heart-pulse-fill me-1"></i> Gestante</label>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input border-primary" id="showGestante">
+              <label class="form-check-label" for="showGestante"><i class="bi bi-file-earmark-x-fill"></i> Arquivados</label>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input  border-danger" id="showGestante">
+              <label class="form-check-label text-danger" for="showGestante"><i class="bi bi-trash-fill me-1"></i> Arquivo Morto</label>
+            </div>
+          </div>
+          
+        </form>
       </div>
-    </form>
+    </div>
+    
 
     <!-- Listagem -->
     <div class="accordion" id="assistidosAccordion">
@@ -31,9 +52,17 @@
             <i class="bi bi-person-circle me-2"></i>
             {{ a.nmcompleto_assist }} - <small class="text-muted ms-2">{{ a.numero_assist }}/{{ a.DTCADASTRO|date:'y' }}</small> 
             {% if a.gestante_assist %}
-              <span class="badge text-bg-warning ms-3">Gestante</span>
+              <span class="badge text-bg-warning ms-3">
+                <i class="bi bi-heart-pulse-fill me-1"></i>
+                Gestante
+              </span>
             {% endif %}
-              
+            {% if a.arquivomorto_assist %}
+              <span class="badge text-bg-danger ms-3">
+                <i class="bi bi-file-earmark-x-fill me-1"></i>
+                Arquivo Morto
+              </span>
+            {% endif %}
           </button>
         </h2>
         <div id="collapse{{ a.id_assist }}" class="accordion-collapse collapse" aria-labelledby="heading{{ a.id_assist }}"
@@ -58,14 +87,21 @@
                 <a class="btn btn-outline-primary" href="{% url 'assistido:detalhe' a.id_assist %}" target="_blank">
                   <i class="bi bi-eye"></i> Ver detalhes
                 </a>
-                <button class="btn btn-secondary">
+                <div>
+                  <button class="btn btn-secondary">
                   <i class="bi bi-bell"></i>
                   Notificar
                 </button>
-                <button class="btn btn-danger">
+                <button class="btn btn-outline-secondary">
                   <i class="bi bi-archive"></i>
                   Arquivar
                 </button>
+                <button class="btn btn-danger">
+                  <i class="bi bi-archive-fill"></i>
+                  Arquivo Morto
+                </button>
+                </div>
+                
               </div>
                 
             </div>

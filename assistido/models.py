@@ -1,4 +1,8 @@
 from django.db import models
+from usuario.models import Conselheiro
+
+
+
 
 
 class Assistido(models.Model):
@@ -32,10 +36,17 @@ class Assistido(models.Model):
     bairro_assist = models.CharField(max_length=100, blank=True, null=True)
     cidade_assist = models.CharField(max_length=100, blank=True, null=True)
     numerocasa_assist = models.CharField(max_length=20, blank=True, null=True)
-    nm_conselheiro = models.CharField(max_length=255, blank=True, null=True)
+    id_conselheiro = models.ForeignKey(
+        Conselheiro,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='assistidos'
+    )
 
     gestante_assist = models.BooleanField(default=False)
     arquivomorto_assist = models.BooleanField(default=False)
+    arquivado_assist = models.BooleanField(default=False)
     filaarquivomorto_assist = models.BooleanField(default=False)
     dtarquivomorto_assist = models.DateField(blank=True, null=True)
 
