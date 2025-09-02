@@ -13,27 +13,39 @@
     <!-- Pesquisa -->
     <div class="card mb-4">
       <div class="card-body container">
-        <form method="get" class="mb-3 row g-2">
-          <div class="input-group col-12">
-            <input type="text" class="form-control" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Pesquisar assistido...">
-            <button class="btn btn-outline-secondary" type="submit">Pesquisar</button>
-          </div>
-          <div class="col-4">
-            <div class="form-check">
-              <input type="checkbox" class="form-check-input border-primary" id="showGestante">
-              <label class="form-check-label" for="showGestante"><i class="bi bi-heart-pulse-fill me-1"></i> Gestante</label>
+        <form method="get" class="mb-3 row">
+          <div class="col-9">
+            <div class="input-group">
+              <input type="text" class="form-control" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Pesquisar assistido...">
+              <button class="btn btn-outline-secondary" type="submit">Pesquisar</button>
             </div>
           </div>
-          <div class="col-4">
+          <div class="col-3">
+            <label for="inputConselheira" class="form-label visually-hidden">Conselheira:</label>
+            <select id="inputState" class="form-select">
+              <option selected>Escolher conselheira</option>
+              <option>Conselheira 1</option>
+              <option>Conselheira 2</option>
+              <option>Conselheira 3</option>
+              <option>Conselheira 4</option>
+            </select>
+          </div>
+          <div class="col-3">
             <div class="form-check">
-              <input type="checkbox" class="form-check-input border-primary" id="showGestante">
-              <label class="form-check-label" for="showGestante"><i class="bi bi-file-earmark-x-fill"></i> Arquivados</label>
+              <input type="checkbox" class="form-check-input border-primary" id="inputGestante">
+              <label class="form-check-label" for="inputGestante"><i class="bi bi-heart-pulse-fill me-1"></i> Gestante</label>
             </div>
           </div>
-          <div class="col-4">
+          <div class="col-3">
             <div class="form-check">
-              <input type="checkbox" class="form-check-input  border-danger" id="showGestante">
-              <label class="form-check-label text-danger" for="showGestante"><i class="bi bi-trash-fill me-1"></i> Arquivo Morto</label>
+              <input type="checkbox" class="form-check-input border-primary" id="inputArquivados">
+              <label class="form-check-label" for="inputArquivados"><i class="bi bi-file-earmark-x-fill"></i> Arquivados</label>
+            </div>
+          </div>
+          <div class="col-3">
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input  border-danger" id="inputArquivoMorto">
+              <label class="form-check-label text-danger" for="inputArquivoMorto"><i class="bi bi-trash-fill me-1"></i> Arquivo Morto</label>
             </div>
           </div>
           
