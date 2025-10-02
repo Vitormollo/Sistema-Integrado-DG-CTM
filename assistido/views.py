@@ -1,3 +1,28 @@
+from django.views.decorators.http import require_POST
+from django.shortcuts import redirect
+# View para cadastrar assistido via modal
+@require_POST
+def cadastrar_assistido(request):
+    from assistido.models import Assistido
+    nome = request.POST.get('nmcompleto_assist')
+    numero = request.POST.get('numero_assist')
+    dn = request.POST.get('dn_assist')
+    genitor = request.POST.get('nmgenitor_assist')
+    genitora = request.POST.get('nmgenitora_assist')
+    gestante = request.POST.get('gestante_assist') == 'True'
+    conselheira_id = request.POST.get('id_conselheira')
+
+    assistido = Assistido(
+        nmcompleto_assist=nome,
+        numero_assist=numero,
+        dn_assist=dn if dn else None,
+        nmgenitor_assist=genitor,
+        nmgenitora_assist=genitora,
+        gestante_assist=gestante,
+        id_conselheira_id=conselheira_id if conselheira_id else None
+    )
+    assistido.save()
+    return redirect('assistido:assistidos')
 from assistido.models import Localizador
 from django.utils import timezone
 
@@ -103,16 +128,41 @@ def add_irmao(request, id_assist):
     return render(request, 'assistido/add_irmao.html', {'form': form, 'assistido': assistido})
 
 def assistido_view(request):
+    from usuario.models import Conselheira
     q = request.GET.get('q', '').strip()
+    conselheira_id = request.GET.get('conselheira')
+    gestante = request.GET.get('gestante') == 'on'
+    arquivado = request.GET.get('arquivado') == 'on'
+    arquivomorto = request.GET.get('arquivomorto') == 'on'
+
+    assistidos_qs = Assistido.objects.all()
     if q:
-        assistidos = Assistido.objects.filter(nmcompleto_assist__icontains=q)
-    else:
-        assistidos = Assistido.objects.all()
-    # telefones já podem ser acessados via a.telefones.all no template
+        assistidos_qs = assistidos_qs.filter(nmcompleto_assist__icontains=q)
+    if conselheira_id and conselheira_id.isdigit():
+        assistidos_qs = assistidos_qs.filter(id_conselheira_id=int(conselheira_id))
+    if gestante:
+        assistidos_qs = assistidos_qs.filter(gestante_assist=True)
+    if arquivado:
+        assistidos_qs = assistidos_qs.filter(arquivado_assist=True)
+    if arquivomorto:
+        assistidos_qs = assistidos_qs.filter(arquivomorto_assist=True)
+
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    page = request.GET.get('page', 1)
+    paginator = Paginator(assistidos_qs, 25)
+    try:
+        assistidos = paginator.page(page)
+    except PageNotAnInteger:
+        assistidos = paginator.page(1)
+    except EmptyPage:
+        assistidos = paginator.page(paginator.num_pages)
+
+    conselheiras = Conselheira.objects.all()
     return render(request, 'assistido/assistidos.html', {
         'pagina_atual': 'assistidos',
         'page_title': 'Assistidos',
         'assistidos': assistidos,
+        'conselheiras': conselheiras,
         'request': request
     })
 

@@ -11,4 +11,5 @@ urlpatterns = [
     path('detalhe/<int:id_assist>/', views.detalhe_assistido, name='detalhe'),
     path('add-irmao/<int:id_assist>/', views.add_irmao, name='add_irmao'),
     path('add-local/<int:id_assist>/', views.add_local, name='add_local'),
+    path('cadastrar/', views.cadastrar_assistido, name='cadastrar'),
 ]

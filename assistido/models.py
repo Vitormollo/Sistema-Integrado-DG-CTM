@@ -1,5 +1,5 @@
 from django.db import models
-from usuario.models import Conselheiro
+from usuario.models import Conselheira
 
 
 
@@ -9,7 +9,7 @@ class Assistido(models.Model):
     id_assist = models.AutoField(primary_key=True)
     nmcompleto_assist = models.CharField(max_length=255)
     numero_assist = models.CharField(max_length=50, blank=True, null=True)
-    dn_assist = models.DateField()  # Data de nascimento
+    dn_assist = models.DateField(blank=True, null=True)  # Data de nascimento
     nmgenitor_assist = models.CharField(max_length=255, blank=True, null=True)
     nmgenitora_assist = models.CharField(max_length=255, blank=True, null=True)
 
@@ -36,8 +36,8 @@ class Assistido(models.Model):
     bairro_assist = models.CharField(max_length=100, blank=True, null=True)
     cidade_assist = models.CharField(max_length=100, blank=True, null=True)
     numerocasa_assist = models.CharField(max_length=20, blank=True, null=True)
-    id_conselheiro = models.ForeignKey(
-        Conselheiro,
+    id_conselheira = models.ForeignKey(
+        Conselheira,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
