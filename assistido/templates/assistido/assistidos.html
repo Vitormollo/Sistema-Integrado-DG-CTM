@@ -83,10 +83,8 @@
             <div class="row">
               <div class="col-12">
                 <p><strong>Data de Nascimento:</strong> {{ a.dn_assist|date:'d/m/Y' }}</p>
-                <p><strong>Responsável:</strong> {{ a.nmresponsavel_assist }}{% if a.nmresponsavel_assist == 'outro' and a.outro_responsavel %} - {{ a.outro_responsavel }}{% endif %}</p>
                 <p><strong>Genitor:</strong> {{ a.nmgenitor_assist }}</p>
                 <p><strong>Genitora:</strong> {{ a.nmgenitora_assist }}</p>
-                <p><strong>Escola:</strong> {{ a.escola_assist }}</p>
                 <p><strong>Telefones:</strong>
                   {% for tel in a.telefones.all %}
                     <span class="d-block">{{ tel.numero_telefone|format_telefone }}{% if tel.obs_telefone %} <small class="text-muted">({{ tel.obs_telefone }})</small>{% endif %}</span>
@@ -94,25 +92,28 @@
                     <span class="text-muted">Nenhum telefone cadastrado.</span>
                   {% endfor %}
                 </p>
+                
               </div>
               <div class="d-flex justify-content-between">
+                
+                <div>
+                  <button class="btn btn-secondary">
+                    <i class="bi bi-bell"></i>
+                    Notificar
+                  </button>
+                  <button class="btn btn-outline-secondary">
+                    <i class="bi bi-archive"></i>
+                    Arquivar
+                  </button>
+                  <button class="btn btn-danger">
+                    <i class="bi bi-archive-fill"></i>
+                    Arquivo Morto
+                  </button>
+                </div>
+
                 <a class="btn btn-outline-primary" href="{% url 'assistido:detalhe' a.id_assist %}" target="_blank">
                   <i class="bi bi-eye"></i> Ver detalhes
                 </a>
-                <div>
-                  <button class="btn btn-secondary">
-                  <i class="bi bi-bell"></i>
-                  Notificar
-                </button>
-                <button class="btn btn-outline-secondary">
-                  <i class="bi bi-archive"></i>
-                  Arquivar
-                </button>
-                <button class="btn btn-danger">
-                  <i class="bi bi-archive-fill"></i>
-                  Arquivo Morto
-                </button>
-                </div>
                 
               </div>
                 

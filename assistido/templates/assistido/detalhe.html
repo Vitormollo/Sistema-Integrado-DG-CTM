@@ -9,9 +9,9 @@
     </div>
     
     <hr>
-    <div class="row">
+    <div class="row g-4">
         <!--INFORMAÇÕES PRINCIPAIS-->
-        <div class="col-6">
+        <div class="col-12 col-md-6">
             <p><strong>Nome:</strong> {{ assistido.nmcompleto_assist }}</p>
             <p><strong>Número da pasta:</strong> {{ assistido.numero_assist }}/{{ assistido.DTCADASTRO|date:'y' }}</p>
             <p><strong>Data de Nascimento:</strong> {{ assistido.dn_assist|date:'d/m/Y' }}</p>
@@ -24,7 +24,7 @@
             <p><strong>Cidade:</strong> {{ assistido.cidade_assist }}</p>
             <p><strong>Gestante:</strong> {{ assistido.gestante_assist|yesno:'Sim,Não' }}</p>
         </div>
-        <div class="col-6">
+        <div class="col-12 col-md-6">
             <h5>Informações Adicionais:</h5>
             <h6>Telefones</h6>
             {% for tel in assistido.telefones.all %}
@@ -167,7 +167,7 @@
         </div><!-- FIM Modal para adicionar nova localização -->
         
         <!--NOTIFICAÇÕES-->
-        <div class="col-6">
+        <div class="col-12 col-md-6">
             <div class="card">
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <span class="me-2">
@@ -202,15 +202,12 @@
         </div>
 
         <!--LOCALIZADOR-->
-        <div class="col-6">
+        <div class="col-12 col-md-6">
             <div class="card">
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <span class="me-2">
                         <i class="bi bi-map-fill"></i>
                     Localização da pasta
-                    </span>
-                    <span>
-                        <a href="">Leia mais</a>
                     </span>
                 </div>
                 <div class="card-body" style="height: 250px;">
