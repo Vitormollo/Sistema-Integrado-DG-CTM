@@ -4,24 +4,41 @@ from django.shortcuts import redirect
 @require_POST
 def cadastrar_assistido(request):
     from assistido.models import Assistido
-    nome = request.POST.get('nmcompleto_assist')
-    numero = request.POST.get('numero_assist')
-    dn = request.POST.get('dn_assist')
-    genitor = request.POST.get('nmgenitor_assist')
-    genitora = request.POST.get('nmgenitora_assist')
-    gestante = request.POST.get('gestante_assist') == 'True'
-    conselheira_id = request.POST.get('id_conselheira')
-
-    assistido = Assistido(
-        nmcompleto_assist=nome,
-        numero_assist=numero,
-        dn_assist=dn if dn else None,
-        nmgenitor_assist=genitor,
-        nmgenitora_assist=genitora,
-        gestante_assist=gestante,
-        id_conselheira_id=conselheira_id if conselheira_id else None
+    from django.utils import timezone
+    ano_atual = timezone.now().year
+    ultimo = Assistido.objects.filter(DTCADASTRO__year=ano_atual).order_by('-numero_assist').first()
+    if ultimo and ultimo.numero_assist and ultimo.numero_assist.isdigit():
+        novo_numero = str(int(ultimo.numero_assist) + 1).zfill(3)
+    else:
+        novo_numero = '001'
+    assistido = Assistido.objects.create(
+        nmcompleto_assist=request.POST.get('nmcompleto_assist'),
+        numero_assist=novo_numero,
+        dn_assist=request.POST.get('dn_assist') or None,
+        nmgenitor_assist=request.POST.get('nmgenitor_assist'),
+        nmgenitora_assist=request.POST.get('nmgenitora_assist'),
+        nmresponsavel_assist=request.POST.get('nmresponsavel_assist'),
+        outro_responsavel=request.POST.get('outro_responsavel'),
+        escola_assist=request.POST.get('escola_assist'),
+        rua_assist=request.POST.get('rua_assist'),
+        bairro_assist=request.POST.get('bairro_assist'),
+        cidade_assist=request.POST.get('cidade_assist'),
+        numerocasa_assist=request.POST.get('numerocasa_assist'),
+        id_conselheira_id=request.POST.get('id_conselheira') or None,
+        gestante_assist=bool(request.POST.get('gestante_assist')),
+        arquivado_assist=bool(request.POST.get('arquivado_assist')),
+        arquivomorto_assist=bool(request.POST.get('arquivomorto_assist')),
     )
-    assistido.save()
+    # Registrar telefone vinculado
+    numero_telefone = request.POST.get('telefone_assist')
+    obs_telefone = request.POST.get('obs_telefone_assist')
+    if numero_telefone:
+        from assistido.models import Telefone
+        Telefone.objects.create(
+            id_assist=assistido,
+            numero_telefone=numero_telefone,
+            obs_telefone=obs_telefone
+        )
     return redirect('assistido:assistidos')
 from assistido.models import Localizador
 from django.utils import timezone
