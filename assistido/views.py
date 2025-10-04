@@ -1,4 +1,14 @@
 from django.views.decorators.http import require_POST
+from django.shortcuts import get_object_or_404, redirect
+from assistido.models import Assistido
+
+@require_POST
+def deletar_assistido(request, id_assist):
+    assistido = get_object_or_404(Assistido, id_assist=id_assist)
+    if assistido.arquivomorto_assist:
+        assistido.delete()
+    return redirect('assistido:assistidos')
+from django.views.decorators.http import require_POST
 from django.shortcuts import redirect
 # View para cadastrar assistido via modal
 @require_POST
@@ -19,11 +29,11 @@ def cadastrar_assistido(request):
         nmgenitora_assist=request.POST.get('nmgenitora_assist'),
         nmresponsavel_assist=request.POST.get('nmresponsavel_assist'),
         outro_responsavel=request.POST.get('outro_responsavel'),
-        escola_assist=request.POST.get('escola_assist'),
-        rua_assist=request.POST.get('rua_assist'),
-        bairro_assist=request.POST.get('bairro_assist'),
-        cidade_assist=request.POST.get('cidade_assist'),
-        numerocasa_assist=request.POST.get('numerocasa_assist'),
+        escola_assist=request.POST.get('nmescola_assist'),
+        rua_assist=request.POST.get('nmrua_assist'),
+        bairro_assist=request.POST.get('nmbairro_assist'),
+        cidade_assist=request.POST.get('nmcidade_assist'),
+        numerocasa_assist=request.POST.get('nmresidencia_assist'),
         id_conselheira_id=request.POST.get('id_conselheira') or None,
         gestante_assist=bool(request.POST.get('gestante_assist')),
         arquivado_assist=bool(request.POST.get('arquivado_assist')),
@@ -82,6 +92,7 @@ def detalhe_assistido(request, id_assist):
         'assistido': assistido,
         'form': form,
         'assistidos_json': assistidos_json,
+        'assistidos_list': assistidos_list,
         'irmaos': irmaos,
         'localizadores': localizadores
     })
@@ -102,10 +113,97 @@ def editar_assistido(request, id_assist):
         assistido.nmgenitor_assist = request.POST.get('nmgenitor_assist', assistido.nmgenitor_assist)
         assistido.nmgenitora_assist = request.POST.get('nmgenitora_assist', assistido.nmgenitora_assist)
         assistido.escola_assist = request.POST.get('escola_assist', assistido.escola_assist)
+        # Boolean fields: form select/options send 'True' or 'False' strings
         assistido.gestante_assist = request.POST.get('gestante_assist', 'False') == 'True'
+        assistido.arquivado_assist = request.POST.get('arquivado_assist', str(assistido.arquivado_assist)) == 'True'
+        arquivomorto_val = request.POST.get('arquivomorto_assist', str(assistido.arquivomorto_assist)) == 'True'
+        assistido.arquivomorto_assist = arquivomorto_val
+
+        # Ajusta data de arquivo morto se flag for marcada; limpa quando desmarcada
+        if arquivomorto_val:
+            from django.utils import timezone
+            if not assistido.dtarquivomorto_assist:
+                assistido.dtarquivomorto_assist = timezone.now().date()
+        else:
+            assistido.dtarquivomorto_assist = None
+
         assistido.save()
-        return redirect('assistido:assistidos')
-    return redirect('assistido:assistidos')
+
+        # --- Processamento robusto de telefones enviados pelo formulário ---
+        # Coleta índices existentes nos nomes dos campos: telefone_<i>, obs_telefone_<i>, telefone_id_<i>
+        import re
+        idxs = set()
+        for key in request.POST.keys():
+            m = re.match(r'^(?:telefone|obs_telefone|telefone_id)_(\d+)$', key)
+            if m:
+                try:
+                    idxs.add(int(m.group(1)))
+                except Exception:
+                    continue
+
+        # Se não encontrou índices por algum motivo (nomes diferentes client-side),
+        # tenta heurística: pega qualquer chave que comece com 'telefone_' e extrai os dígitos finais
+        if not idxs:
+            for key in request.POST.keys():
+                if key.startswith('telefone_') or key.startswith('obs_telefone_') or key.startswith('telefone_id_'):
+                    m2 = re.search(r'(\d+)$', key)
+                    if m2:
+                        try:
+                            idxs.add(int(m2.group(1)))
+                        except Exception:
+                            continue
+
+        from assistido.models import Telefone
+        received_ids = []
+        for idx in sorted(idxs):
+            tel_id_raw = request.POST.get(f'telefone_id_{idx}', '').strip()
+            numero = request.POST.get(f'telefone_{idx}', '').strip()
+            obs = request.POST.get(f'obs_telefone_{idx}', '').strip() or None
+
+            if tel_id_raw:
+                # Atualiza ou deleta existente
+                try:
+                    tel_id = int(tel_id_raw)
+                except Exception:
+                    tel_id = None
+
+                if tel_id:
+                    try:
+                        tel_obj = Telefone.objects.get(id_telefone=tel_id, id_assist=assistido)
+                        if numero:
+                            tel_obj.numero_telefone = numero
+                            tel_obj.obs_telefone = obs
+                            tel_obj.save()
+                            received_ids.append(tel_obj.id_telefone)
+                        else:
+                            # numero vazio -> apagar
+                            tel_obj.delete()
+                    except Telefone.DoesNotExist:
+                        # ignora ids inválidos
+                        continue
+            else:
+                # novo telefone: criar se número informado
+                if numero:
+                    new_tel = Telefone.objects.create(
+                        id_assist=assistido,
+                        numero_telefone=numero,
+                        obs_telefone=obs
+                    )
+                    received_ids.append(new_tel.id_telefone)
+
+        # Remover telefones no DB que não aparecem na lista de ids recebidos
+        # Importante: não apagar tudo caso nenhum índice tenha sido detectado (defensivo)
+        if idxs:
+            if received_ids:
+                Telefone.objects.filter(id_assist=assistido).exclude(id_telefone__in=received_ids).delete()
+            else:
+                # nenhum telefone informado explicitamente -> remover todos
+                Telefone.objects.filter(id_assist=assistido).delete()
+        else:
+            # Não encontramos índices — não alteramos a lista de telefones (para evitar deleções inesperadas)
+            pass
+        return redirect('assistido:detalhe', id_assist=assistido.id_assist)
+    return redirect('assistido:detalhe', id_assist=assistido.id_assist)
 from django.shortcuts import render
 from assistido.models import Assistido
 
@@ -144,6 +242,19 @@ def add_irmao(request, id_assist):
         form = AddIrmaoForm(id_assist)
     return render(request, 'assistido/add_irmao.html', {'form': form, 'assistido': assistido})
 
+
+def remover_irmao(request, id_assist, id_irmao):
+    """Remove a relação de irmandade entre assistido (id_assist) e outro assistido (id_irmao).
+    Espera método POST do formulário da UI."""
+    from django.views.decorators.http import require_POST
+    if request.method == 'POST':
+        from assistido.models import Irmaos
+        assistido = get_object_or_404(Assistido, id_assist=id_assist)
+        # Tenta encontrar a relação em ambos os sentidos
+        Irmaos.objects.filter(id_assist_1=assistido, id_assist_2_id=id_irmao).delete()
+        Irmaos.objects.filter(id_assist_2=assistido, id_assist_1_id=id_irmao).delete()
+    return redirect('assistido:detalhe', id_assist=id_assist)
+
 def assistido_view(request):
     from usuario.models import Conselheira
     q = request.GET.get('q', '').strip()
@@ -151,6 +262,7 @@ def assistido_view(request):
     gestante = request.GET.get('gestante') == 'on'
     arquivado = request.GET.get('arquivado') == 'on'
     arquivomorto = request.GET.get('arquivomorto') == 'on'
+    maior_idade = request.GET.get('maior_idade') == 'on'
 
     assistidos_qs = Assistido.objects.all()
     if q:
@@ -163,6 +275,11 @@ def assistido_view(request):
         assistidos_qs = assistidos_qs.filter(arquivado_assist=True)
     if arquivomorto:
         assistidos_qs = assistidos_qs.filter(arquivomorto_assist=True)
+    if maior_idade:
+        from datetime import date
+        hoje = date.today()
+        data_limite = date(hoje.year - 18, hoje.month, hoje.day)
+        assistidos_qs = assistidos_qs.filter(dn_assist__lte=data_limite)
 
     from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
     page = request.GET.get('page', 1)

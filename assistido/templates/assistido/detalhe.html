@@ -3,26 +3,271 @@
 {% block content %}
 <main class="container my-4">
     <h1>Detalhes do Assistido: </h1>
+        <div>
+            <!-- Badges: Arquivado, Gestante, Maior de Idade, Arquivo Morto -->
+            {% if assistido.arquivado_assist %}
+                <span class="badge text-bg-info me-2">
+                    <i class="bi bi-archive me-1"></i> Arquivado
+                </span>
+            {% endif %}
+            {% if assistido.gestante_assist %}
+                <span class="badge text-bg-warning me-2">
+                    <i class="bi bi-heart-pulse-fill me-1"></i> Gestante
+                </span>
+            {% endif %}
+            {% if assistido.dn_assist and assistido.dn_assist|age >= 18 %}
+                <span class="badge text-bg-dark me-2">
+                    <i class="bi bi-person-bounding-box me-1"></i> Maior de Idade
+                </span>
+            {% endif %}
+            {% if assistido.arquivomorto_assist %}
+                <span class="badge text-bg-danger me-2">
+                    <i class="bi bi-file-earmark-x-fill me-1"></i> Arquivo Morto
+                </span>
+            {% endif %}
+        </div>
     <div class="d-flex w-100 justify-content-between align-content-center">
-        <h2>{{ assistido.nmcompleto_assist }} <span class="badge text-bg-secondary">{{ assistido.numero_assist }}/{{ assistido.DTCADASTRO|date:'y' }}</span></h2>
-        <button class="btn btn-outline-primary text-uppercase"> <i class="bi bi-pencil"></i> Editar Informações</button>
+                                <h2>{{ assistido.nmcompleto_assist }} <span class="badge text-bg-secondary">{{ assistido.numero_assist }}/{{ assistido.DTCADASTRO|date:'y' }}</span></h2>
+                                <div>
+                                    <button class="btn btn-outline-primary text-uppercase" data-bs-toggle="modal" data-bs-target="#modalEditarAssistido">
+                                        <i class="bi bi-pencil"></i> Editar Informações
+                                    </button>
+                                    {% if assistido.arquivomorto_assist %}
+                                        <button type="button" class="btn btn-danger ms-2" data-bs-toggle="modal" data-bs-target="#modalDelete{{ assistido.id_assist }}">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
+                                        <!-- MODAL: Confirmar exclusão do assistido (início) -->
+                                        <!-- Modal de confirmação -->
+                                        <div class="modal fade" id="modalDelete{{ assistido.id_assist }}" tabindex="-1" aria-labelledby="modalDeleteLabel{{ assistido.id_assist }}" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="modalDeleteLabel{{ assistido.id_assist }}">Confirmar exclusão</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        Tem certeza que deseja apagar o assistido <strong>{{ assistido.nmcompleto_assist }}</strong>? Esta ação não pode ser desfeita.
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                        <form method="post" action="{% url 'assistido:deletar' assistido.id_assist %}">
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="btn btn-danger">Apagar</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- MODAL: Confirmar exclusão do assistido (fim) -->
+                                    {% endif %}
+                                </div>
+
+    <!-- MODAL: Editar Assistido (início) -->
+    <!-- Modal Editar Assistido -->
+    <div class="modal fade" id="modalEditarAssistido" tabindex="-1" aria-labelledby="modalEditarAssistidoLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl" data-bs-backdrop="static" data-bs-keyboard="false">
+                <div class="modal-content">
+                    <form method="post" action="{% url 'assistido:editar' assistido.id_assist %}" id="formEditarAssistido">
+                        {% csrf_token %}
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modalEditarAssistidoLabel"><i class="bi bi-pencil-fill me-2"></i>Editar Informações do Assistido</h5>
+                            <button type="button" class="btn-close" id="btnCloseEditarAssistido" aria-label="Fechar"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="nmcompleto_assist" class="form-label">Nome Completo</label>
+                                    <input type="text" class="form-control" id="nmcompleto_assist" name="nmcompleto_assist" value="{{ assistido.nmcompleto_assist }}" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="dn_assist" class="form-label">Data de Nascimento</label>
+                                    <input type="date" class="form-control" id="dn_assist" name="dn_assist" value="{{ assistido.dn_assist|date:'Y-m-d' }}">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="escola_assist" class="form-label">Escola</label>
+                                    <input type="text" class="form-control" id="escola_assist" name="escola_assist" value="{{ assistido.escola_assist }}">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="nmresponsavel_assist" class="form-label">Responsável</label>
+                                    <input type="text" class="form-control" id="nmresponsavel_assist" name="nmresponsavel_assist" value="{{ assistido.nmresponsavel_assist }}">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="nmgenitor_assist" class="form-label">Genitor</label>
+                                    <input type="text" class="form-control" id="nmgenitor_assist" name="nmgenitor_assist" value="{{ assistido.nmgenitor_assist }}">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="nmgenitora_assist" class="form-label">Genitora</label>
+                                    <input type="text" class="form-control" id="nmgenitora_assist" name="nmgenitora_assist" value="{{ assistido.nmgenitora_assist }}">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="rua_assist" class="form-label">Rua</label>
+                                    <input type="text" class="form-control" id="rua_assist" name="rua_assist" value="{{ assistido.rua_assist }}">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="numerocasa_assist" class="form-label">Nº Casa</label>
+                                    <input type="text" class="form-control" id="numerocasa_assist" name="numerocasa_assist" value="{{ assistido.numerocasa_assist }}">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="bairro_assist" class="form-label">Bairro</label>
+                                    <input type="text" class="form-control" id="bairro_assist" name="bairro_assist" value="{{ assistido.bairro_assist }}">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="cidade_assist" class="form-label">Cidade</label>
+                                    <input type="text" class="form-control" id="cidade_assist" name="cidade_assist" value="{{ assistido.cidade_assist }}">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="numero_assist" class="form-label">Número da Pasta</label>
+                                    <input type="text" class="form-control" id="numero_assist" name="numero_assist" value="{{ assistido.numero_assist }}">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="gestante_assist" class="form-label">Gestante</label>
+                                    <select class="form-select" id="gestante_assist" name="gestante_assist">
+                                        <option value="True" {% if assistido.gestante_assist %}selected{% endif %}>Sim</option>
+                                        <option value="False" {% if not assistido.gestante_assist %}selected{% endif %}>Não</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="arquivado_assist" class="form-label">Arquivado</label>
+                                    <select class="form-select" id="arquivado_assist" name="arquivado_assist">
+                                        <option value="True" {% if assistido.arquivado_assist %}selected{% endif %}>Sim</option>
+                                        <option value="False" {% if not assistido.arquivado_assist %}selected{% endif %}>Não</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="arquivomorto_assist" class="form-label">Arquivo Morto</label>
+                                    <select class="form-select" id="arquivomorto_assist" name="arquivomorto_assist">
+                                        <option value="True" {% if assistido.arquivomorto_assist %}selected{% endif %}>Sim</option>
+                                        <option value="False" {% if not assistido.arquivomorto_assist %}selected{% endif %}>Não</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label">Telefones ({{ assistido.telefones.count }})</label>
+                                    <div id="telefones-edit-list">
+                                        {% for tel in assistido.telefones.all %}
+                                            <div class="input-group mb-2">
+                                                <!-- id do telefone para permitir update/delete por id -->
+                                                <input type="hidden" name="telefone_id_{{ forloop.counter }}" value="{{ tel.id_telefone }}">
+                                                <input type="text" class="form-control" name="telefone_{{ forloop.counter }}" value="{{ tel.numero_telefone }}" placeholder="Telefone">
+                                                <input type="text" class="form-control" name="obs_telefone_{{ forloop.counter }}" value="{{ tel.obs_telefone }}" placeholder="Observação">
+                                                <button type="button" class="btn btn-outline-danger" onclick="this.parentElement.remove()"><i class="bi bi-trash"></i></button>
+                                            </div>
+                                        {% endfor %}
+                                        <!-- Botão para adicionar novo telefone -->
+                                        <button type="button" class="btn btn-outline-success" onclick="addTelefoneEdit()"><i class="bi bi-plus"></i> Adicionar Telefone</button>
+                                    </div>
+                                    <script>
+                                        // SCRIPT: adicionar telefone no modal de edição (início)
+                                        function addTelefoneEdit() {
+                                            var container = document.getElementById('telefones-edit-list');
+                                            var idx = container.querySelectorAll('.input-group').length + 1;
+                                            var div = document.createElement('div');
+                                            div.className = 'input-group mb-2';
+                                            // inclui um hidden telefone_id vazio para facilitar o processamento no servidor
+                                            div.innerHTML = `<input type="hidden" name="telefone_id_${idx}" value=""><input type="text" class="form-control" name="telefone_${idx}" placeholder="Telefone"><input type="text" class="form-control" name="obs_telefone_${idx}" placeholder="Observação"><button type="button" class="btn btn-outline-danger" onclick="this.parentElement.remove()"><i class="bi bi-trash"></i></button>`;
+                                            container.insertBefore(div, container.lastElementChild);
+                                        }
+                                        // SCRIPT: adicionar telefone no modal de edição (fim)
+                                    </script>
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label">Irmãos</label>
+                                    <ul class="list-group">
+                                        {% for irmao in irmaos %}
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <span>{{ irmao.nmcompleto_assist }}</span>
+                                                <form method="post" action="{% url 'assistido:remover_irmao' assistido.id_assist irmao.id_assist %}" style="display:inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm"><i class="bi bi-x"></i> Remover relação</button>
+                                                </form>
+                                            </li>
+                                        {% empty %}
+                                            <li class="list-group-item text-muted">Nenhum irmão cadastrado.</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" id="btnCancelarEditarAssistido">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                        </div>
+                        <!-- MODAL: Editar Assistido (fim) -->
+
+                        
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-    
+    <!-- MODAL: Confirmação de fechamento do Editar (início) -->
+    <!-- Modal de confirmação de fechamento do Editar -->
+    <div class="modal fade" id="modalConfirmCloseEditarAssistido" tabindex="-1" aria-labelledby="modalConfirmCloseEditarAssistidoLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                        <div class="modal-content">
+                                <div class="modal-header">
+                                        <h5 class="modal-title" id="modalConfirmCloseEditarAssistidoLabel">Tem certeza que deseja fechar?</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                        <p>Se você fechar agora, as informações preenchidas serão perdidas.</p>
+                                </div>
+                                <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Retornar</button>
+                                        <button type="button" class="btn btn-danger" id="btnFecharMesmoEditarAssistido">Sair mesmo assim</button>
+                                </div>
+                        </div>
+                </div>
+    </div>
+    <!-- MODAL: Confirmação de fechamento do Editar (fim) -->
+
+    <!-- SCRIPT: controle do modal de edição e confirmação (início) -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+            var modalEditarEl = document.getElementById('modalEditarAssistido');
+            var modalEditar = new bootstrap.Modal(modalEditarEl);
+            var modalConfirm = new bootstrap.Modal(document.getElementById('modalConfirmCloseEditarAssistido'));
+            var btnClose = document.getElementById('btnCloseEditarAssistido');
+            var btnCancelar = document.getElementById('btnCancelarEditarAssistido');
+            var btnFecharMesmo = document.getElementById('btnFecharMesmoEditarAssistido');
+            var shouldReallyClose = false;
+
+            function showConfirmModal(e) {
+                e.preventDefault();
+                modalConfirm.show();
+            }
+
+            if (btnClose) btnClose.addEventListener('click', showConfirmModal);
+            if (btnCancelar) btnCancelar.addEventListener('click', showConfirmModal);
+            if (btnFecharMesmo) btnFecharMesmo.addEventListener('click', function() {
+                shouldReallyClose = true;
+                modalConfirm.hide();
+                modalEditar.hide();
+                setTimeout(function(){ shouldReallyClose = false; }, 500);
+            });
+
+            // Intercepta tentativa de fechar pelo backdrop ou ESC
+            modalEditarEl.addEventListener('hide.bs.modal', function(e) {
+                if (!shouldReallyClose) {
+                    e.preventDefault();
+                    modalConfirm.show();
+                }
+            });
+        });
+        </script>
+
     <hr>
     <div class="row g-4">
         <!--INFORMAÇÕES PRINCIPAIS-->
         <div class="col-12 col-md-6">
             <p><strong>Nome:</strong> {{ assistido.nmcompleto_assist }}</p>
             <p><strong>Número da pasta:</strong> {{ assistido.numero_assist }}/{{ assistido.DTCADASTRO|date:'y' }}</p>
-            <p><strong>Data de Nascimento:</strong> {{ assistido.dn_assist|date:'d/m/Y' }}</p>
+            <p><strong>Data de Nascimento:</strong> {{ assistido.dn_assist|date:'d/m/Y' }}{% if assistido.dn_assist %} ({{ assistido.dn_assist|age }} anos){% endif %}</p>
             <p><strong>Responsável:</strong> {{ assistido.nmresponsavel_assist }}{% if assistido.nmresponsavel_assist == 'outro' and assistido.outro_responsavel %} - {{ assistido.outro_responsavel }}{% endif %}</p>
             <p><strong>Genitor:</strong> {{ assistido.nmgenitor_assist }}</p>
             <p><strong>Genitora:</strong> {{ assistido.nmgenitora_assist }}</p>
             <p><strong>Escola:</strong> {{ assistido.escola_assist }}</p>
-            <p><strong>Endereço:</strong> {{ assistido.rua_assist }}{% if assistido.numerocasa_assist %}, {{assistido.numerocasa_assist }}{% endif %}</p>
-            <p><strong>Bairro:</strong> {{ assistido.bairro_assist }}</p>
-            <p><strong>Cidade:</strong> {{ assistido.cidade_assist }}</p>
-            <p><strong>Gestante:</strong> {{ assistido.gestante_assist|yesno:'Sim,Não' }}</p>
+            <p><strong>Endereço:</strong> {{ assistido.rua_assist }}{% if assistido.numerocasa_assist %}, {{ assistido.numerocasa_assist }}{% endif %}{% if assistido.bairro_assist %}, {{ assistido.bairro_assist }}{% endif %}{% if assistido.cidade_assist %}, {{ assistido.cidade_assist }}{% endif %}</p>
+            
         </div>
         <div class="col-12 col-md-6">
             <h5>Informações Adicionais:</h5>
@@ -48,14 +293,14 @@
                     </p>
                 {% endfor %}
             {% else %}
-                <p class="text-muted">Nenhum irmão cadastrado.</p>
             {% endif %}
 
             
         </div>
 
         <!-- Modal Bootstrap para adicionar irmão -->
-        <div class="modal fade" id="addIrmaoModal" tabindex="-1" aria-labelledby="addIrmaoModalLabel" aria-hidden="true">
+    <!-- MODAL: Adicionar Irmão (início) -->
+    <div class="modal fade" id="addIrmaoModal" tabindex="-1" aria-labelledby="addIrmaoModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <form method="post" action="{% url 'assistido:add_irmao' assistido.id_assist %}">
@@ -70,39 +315,142 @@
                                 <input type="text" id="autocomplete-irmao" class="form-control" autocomplete="off" placeholder="Nome do irmão...">
                                 <input type="hidden" name="irmao" id="irmao-id">
                                 <div id="autocomplete-list" class="list-group position-absolute w-100" style="z-index: 1055;"></div>
+                                <!-- DADOS: assistidos para autocomplete (script JSON) - início -->
+                                <script id="assistidos-data" type="application/json">{{ assistidos_json|default:'[]'|safe }}</script>
+                                <!-- DADOS: assistidos para autocomplete (script JSON) - fim -->
                             </div>
                             <script>
-                                // Lista de assistidos disponíveis (renderizada pelo Django)
-                                // Lista de assistidos disponível para autocomplete
-                                const assistidos = {{ assistidos_json|safe }};
+                                (function() {
+                                    // Autocomplete de irmãos (defensivo)
+                                    try {
+                                        var assistidos = [];
+                                        var dataEl = document.getElementById('assistidos-data');
+                                        var raw = dataEl ? dataEl.textContent || dataEl.innerText || '[]' : '[]';
 
-                                const input = document.getElementById('autocomplete-irmao');
-                                const hidden = document.getElementById('irmao-id');
-                                const list = document.getElementById('autocomplete-list');
-                                input.addEventListener('input', function() {
-                                    const val = this.value.toLowerCase();
-                                    list.innerHTML = '';
-                                    if (val.length < 2) return;
-                                    const matches = assistidos.filter(a => a.nome.toLowerCase().includes(val));
-                                    matches.forEach(a => {
-                                        const item = document.createElement('button');
-                                        item.type = 'button';
-                                        item.className = 'list-group-item list-group-item-action';
-                                        item.textContent = a.nome;
-                                        item.onclick = function() {
-                                            input.value = a.nome;
-                                            hidden.value = a.id;
+                                        function htmlUnescape(str) {
+                                            var txt = document.createElement('textarea');
+                                            txt.innerHTML = str;
+                                            return txt.value;
+                                        }
+
+                                        function tryParse(rawStr) {
+                                            // tentativa 1: JSON.parse direto
+                                            try {
+                                                return JSON.parse(rawStr);
+                                            } catch (e) {
+                                                // continue
+                                            }
+
+                                            // tentativa 2: decodifica entidades HTML (ex: &quot;)
+                                            try {
+                                                var decoded = htmlUnescape(rawStr);
+                                                return JSON.parse(decoded);
+                                            } catch (e) {
+                                                // continue
+                                            }
+
+                                            // tentativa 3: substituir aspas simples por duplas (heurística)
+                                            try {
+                                                var replaced = rawStr.replace(/\'/g, '"');
+                                                return JSON.parse(replaced);
+                                            } catch (e) {
+                                                // continue
+                                            }
+
+                                            // tentativa 4: avaliar como literal JS (último recurso, controlado)
+                                            try {
+                                                return (new Function('return ' + rawStr))();
+                                            } catch (e) {
+                                                console.error('Falha ao parsear assistidos (todas as tentativas):', e, rawStr);
+                                                return [];
+                                            }
+                                        }
+
+                                        try {
+                                            assistidos = tryParse(raw || '[]') || [];
+                                        } catch (err) {
+                                            console.error('assistidos parse unexpected error:', err, raw);
+                                            assistidos = [];
+                                        }
+
+                                        var input = document.getElementById('autocomplete-irmao');
+                                        var hidden = document.getElementById('irmao-id');
+                                        var list = document.getElementById('autocomplete-list');
+                                        if (!input || !list) return;
+
+                                        // Pré-computa versão sem acentos para busca (mais tolerante)
+                                        function removeDiacritics(str) {
+                                            if (!str) return '';
+                                            try {
+                                                return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+                                            } catch (e) {
+                                                // fallback simples
+                                                return str.replace(/[\u0300-\u036f]/g, '').toLowerCase();
+                                            }
+                                        }
+
+                                        assistidos = (assistidos || []).map(function(a) {
+                                            var nome = a && a.nome ? String(a.nome) : '';
+                                            return {
+                                                id: a && a.id ? a.id : null,
+                                                nome: nome,
+                                                nome_norm: removeDiacritics(nome)
+                                            };
+                                        });
+
+                                        function clearList() {
                                             list.innerHTML = '';
-                                        };
-                                        list.appendChild(item);
-                                    });
-                                });
-                                // Limpa sugestões ao clicar fora
-                                document.addEventListener('click', function(e) {
-                                    if (!input.contains(e.target) && !list.contains(e.target)) {
-                                        list.innerHTML = '';
+                                            list.style.display = 'none';
+                                        }
+
+                                        function showList() {
+                                            list.style.display = 'block';
+                                        }
+
+                                        input.addEventListener('input', function() {
+                                            var rawVal = (this.value || '');
+                                            var valNorm = removeDiacritics(rawVal).trim();
+                                            clearList();
+                                            if (valNorm.length < 2) return;
+                                            var matches = assistidos.filter(function(a) {
+                                                return a.nome_norm && a.nome_norm.indexOf(valNorm) !== -1;
+                                            });
+                                            if (!matches.length) return;
+                                            matches.forEach(function(a) {
+                                                var item = document.createElement('button');
+                                                item.type = 'button';
+                                                item.className = 'list-group-item list-group-item-action';
+                                                item.textContent = a.nome;
+                                                item.setAttribute('data-id', a.id);
+                                                item.addEventListener('click', function(ev) {
+                                                    ev.preventDefault();
+                                                    input.value = a.nome;
+                                                    if (hidden) hidden.value = a.id;
+                                                    clearList();
+                                                });
+                                                list.appendChild(item);
+                                            });
+                                            showList();
+                                        });
+
+                                        // fecha sugestões ao clicar fora
+                                        document.addEventListener('click', function(e) {
+                                            if (!input.contains(e.target) && !list.contains(e.target)) {
+                                                clearList();
+                                            }
+                                        });
+
+                                        // tecla ESC limpa
+                                        input.addEventListener('keydown', function(e) {
+                                            if (e.key === 'Escape') {
+                                                clearList();
+                                            }
+                                        });
+
+                                    } catch (err) {
+                                        console.error('Erro no autocomplete de irmãos:', err);
                                     }
-                                });
+                                })();
                             </script>
                         </div>
                         <div class="modal-footer">

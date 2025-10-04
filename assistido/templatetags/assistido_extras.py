@@ -1,7 +1,30 @@
 from django import template
 import re
+from datetime import date
 
 register = template.Library()
+
+# Filtro para calcular dias passados desde uma data
+@register.filter
+def dias_passados(value):
+    if not value:
+        return ''
+    today = date.today()
+    try:
+        return (today - value).days
+    except Exception:
+        return ''
+
+# Filtro para calcular idade
+@register.filter
+def age(value):
+    if not value:
+        return ''
+    today = date.today()
+    try:
+        return today.year - value.year - ((today.month, today.day) < (value.month, value.day))
+    except Exception:
+        return ''
 
 @register.filter
 def format_telefone(value):

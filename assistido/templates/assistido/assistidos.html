@@ -14,13 +14,13 @@
     <div class="card mb-4">
       <div class="card-body container">
         <form method="get" class="mb-3 row g-2">
-          <div class="col-9">
+          <div class="col-lg-9">
             <div class="input-group">
               <input type="text" class="form-control" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Pesquisar assistido...">
               <button class="btn btn-outline-secondary" type="submit">Pesquisar</button>
             </div>
           </div>
-          <div class="col-3">
+          <div class="col-lg-3">
             <label for="inputConselheira" class="form-label visually-hidden">Conselheira:</label>
             <select id="inputConselheira" name="conselheira" class="form-select">
               <option value="">Escolher conselheira</option>
@@ -29,25 +29,31 @@
               {% endfor %}
             </select>
           </div>
-          <div class="col-3">
+          <div class="col-lg-2">
             <div class="form-check">
               <input type="checkbox" class="form-check-input border-primary" id="inputGestante" name="gestante" {% if request.GET.gestante %}checked{% endif %}>
               <label class="form-check-label" for="inputGestante"><i class="bi bi-heart-pulse-fill me-1"></i> Gestante</label>
             </div>
           </div>
-          <div class="col-3">
+          <div class="col-lg-2">
             <div class="form-check">
               <input type="checkbox" class="form-check-input border-primary" id="inputArquivados" name="arquivado" {% if request.GET.arquivado %}checked{% endif %}>
               <label class="form-check-label" for="inputArquivados"><i class="bi bi-file-earmark-x-fill"></i> Arquivados</label>
             </div>
           </div>
-          <div class="col-3">
+          <div class="col-lg-2">
             <div class="form-check">
               <input type="checkbox" class="form-check-input border-danger" id="inputArquivoMorto" name="arquivomorto" {% if request.GET.arquivomorto %}checked{% endif %}>
               <label class="form-check-label text-danger" for="inputArquivoMorto"><i class="bi bi-trash-fill me-1"></i> Arquivo Morto</label>
             </div>
           </div>
-          <div class="col-3 d-flex justify-content-end">
+          <div class="col-lg-2">
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input border-dark" id="inputMaiorIdade" name="maior_idade" {% if request.GET.maior_idade %}checked{% endif %}>
+              <label class="form-check-label" for="inputMaiorIdade"><i class="bi bi-person-bounding-box me-1"></i> Maior de Idade</label>
+            </div>
+          </div>
+          <div class="col-lg-4 d-flex justify-content-end">
             <a href="{% url 'assistido:assistidos' %}" class="btn btn-outline-secondary me-2">Limpar Filtros</a>
             <button type="submit" class="btn btn-primary">Aplicar Filtros</button>
           </div>
@@ -67,18 +73,42 @@
             data-bs-target="#collapse{{ a.id_assist }}" aria-expanded="false" aria-controls="collapse{{ a.id_assist }}">
             <i class="bi bi-person-circle me-2"></i>
             {{ a.nmcompleto_assist }} - <small class="text-muted ms-2">{{ a.numero_assist }}/{{ a.DTCADASTRO|date:'y' }}</small> 
+
+            <!-- Filtro de Maior de Idade -->
+            {% if a.dn_assist and a.dn_assist|age >= 18 %}
+              <span class="badge text-bg-dark ms-3">
+                <i class="bi bi-person-bounding-box me-1"></i>
+                MAIOR DE IDADE
+              </span>
+            {% endif %}
+            <!-- Fim Filtro de Maior de Idade -->
+
+            <!-- Filtro de Gestante -->
             {% if a.gestante_assist %}
               <span class="badge text-bg-warning ms-3">
                 <i class="bi bi-heart-pulse-fill me-1"></i>
                 Gestante
               </span>
             {% endif %}
+            <!-- Fim Filtro de Gestante -->
+            
+            <!-- Filtro de Arquivado -->
+            {% if a.arquivado_assist %}
+              <span class="badge text-bg-info ms-3">
+                <i class="bi bi-archive me-1"></i>
+                Arquivado
+              </span>
+            {% endif %}
+            <!-- Fim Filtro de Arquivado -->
+
+            <!-- Filtro de Arquivo Morto -->
             {% if a.arquivomorto_assist %}
               <span class="badge text-bg-danger ms-3">
                 <i class="bi bi-file-earmark-x-fill me-1"></i>
                 Arquivo Morto
               </span>
             {% endif %}
+            <!-- Fim Filtro de Arquivo Morto -->
           </button>
         </h2>
         <div id="collapse{{ a.id_assist }}" class="accordion-collapse collapse" aria-labelledby="heading{{ a.id_assist }}"
@@ -86,7 +116,10 @@
           <div class="accordion-body">
             <div class="row">
               <div class="col-12">
-                <p><strong>Data de Nascimento:</strong> {{ a.dn_assist|date:'d/m/Y' }}</p>
+                <p><strong>Data de Nascimento:</strong> {{ a.dn_assist|date:'d/m/Y' }} {% if a.dn_assist %}({{ a.dn_assist|age }} anos){% endif %}</p>
+                {% if a.arquivomorto_assist and a.dtarquivomorto_assist %}
+                  <p class="text-danger"><strong>Arquivo Morto há:</strong> {{ a.dtarquivomorto_assist|dias_passados }} dias</p>
+                {% endif %}
                 <p><strong>Genitor:</strong> {{ a.nmgenitor_assist }}</p>
                 <p><strong>Genitora:</strong> {{ a.nmgenitora_assist }}</p>
                 <p><strong>Telefones:</strong>
@@ -105,14 +138,65 @@
                     <i class="bi bi-bell"></i>
                     Notificar
                   </button>
-                  <button class="btn btn-outline-secondary">
-                    <i class="bi bi-archive"></i>
-                    Arquivar
-                  </button>
-                  <button class="btn btn-danger">
-                    <i class="bi bi-archive-fill"></i>
-                    Arquivo Morto
-                  </button>
+                  {% if a.arquivado_assist %}
+                    <form method="post" action="{% url 'assistido:desarquivar' a.id_assist %}" style="display:inline;">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-success">
+                        <i class="bi bi-archive"></i>
+                        Desarquivar
+                      </button>
+                    </form>
+                  {% else %}
+                    <form method="post" action="{% url 'assistido:arquivar' a.id_assist %}" style="display:inline;">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-outline-secondary">
+                        <i class="bi bi-archive"></i>
+                        Arquivar
+                      </button>
+                    </form>
+                  {% endif %}
+                  {% if a.arquivomorto_assist %}
+                    <form method="post" action="{% url 'assistido:desarquivar_morto' a.id_assist %}" style="display:inline;">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-success">
+                        <i class="bi bi-archive-fill"></i>
+                        Desarquivar Arquivo Morto
+                      </button>
+                    </form>
+                    <!-- Botão de apagar -->
+                    <button type="button" class="btn btn-danger ms-2" data-bs-toggle="modal" data-bs-target="#modalDelete{{ a.id_assist }}">
+                      <i class="bi bi-trash-fill"></i>
+                    </button>
+                    <!-- Modal de confirmação -->
+                    <div class="modal fade" id="modalDelete{{ a.id_assist }}" tabindex="-1" aria-labelledby="modalDeleteLabel{{ a.id_assist }}" aria-hidden="true">
+                      <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="modalDeleteLabel{{ a.id_assist }}">Confirmar exclusão</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            Tem certeza que deseja apagar o assistido <strong>{{ a.nmcompleto_assist }}</strong>? Esta ação não pode ser desfeita.
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <form method="post" action="{% url 'assistido:deletar' a.id_assist %}">
+                              {% csrf_token %}
+                              <button type="submit" class="btn btn-danger">Apagar</button>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {% else %}
+                    <form method="post" action="{% url 'assistido:arquivar_morto' a.id_assist %}" style="display:inline;">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-archive-fill"></i>
+                        Arquivo Morto
+                      </button>
+                    </form>
+                  {% endif %}
                 </div>
 
                 <a class="btn btn-outline-primary" href="{% url 'assistido:detalhe' a.id_assist %}" target="_blank">
@@ -215,10 +299,10 @@
                     <label for="nmrua_assist" class="form-label">Rua</label>
                     <input type="text" class="form-control" id="nmrua_assist" name="nmrua_assist">
                   </div>
-                  <!-- Estado-->
+                  <!-- Cidade-->
                   <div class="col-md-3">
-                    <label for="nmestado_assist" class="form-label">Estado</label>
-                    <input type="text" class="form-control" id="nmestado_assist" name="nmestado_assist">
+                    <label for="nmcidade_assist" class="form-label">Cidade</label>
+                    <input type="text" class="form-control" id="nmcidade_assist" name="nmcidade_assist">
                   </div>
 
                   <!-- Escola -->
