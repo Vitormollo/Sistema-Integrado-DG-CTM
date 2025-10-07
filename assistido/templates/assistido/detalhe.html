@@ -174,11 +174,12 @@
                                     <ul class="list-group">
                                         {% for irmao in irmaos %}
                                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                <span>{{ irmao.nmcompleto_assist }}</span>
-                                                <form method="post" action="{% url 'assistido:remover_irmao' assistido.id_assist irmao.id_assist %}" style="display:inline;">
-                                                    {% csrf_token %}
-                                                    <button type="submit" class="btn btn-outline-danger btn-sm"><i class="bi bi-x"></i> Remover relação</button>
-                                                </form>
+                                                <span>
+                                                    {{ irmao.nmcompleto_assist }}
+                                                    <span class="badge text-bg-secondary ms-2">{{ irmao.numero_assist }}/{{ irmao.DTCADASTRO|date:'y' }}</span>
+                                                </span>
+                                                <!-- Evita form aninhado: usa botão com data-url e JS para criar form temporário -->
+                                                <button type="button" class="btn btn-outline-danger btn-sm btn-remove-irmao" data-url="{% url 'assistido:remover_irmao' assistido.id_assist irmao.id_assist %}"><i class="bi bi-x"></i> Remover relação</button>
                                             </li>
                                         {% empty %}
                                             <li class="list-group-item text-muted">Nenhum irmão cadastrado.</li>
@@ -271,14 +272,14 @@
         </div>
         <div class="col-12 col-md-6">
             <h5>Informações Adicionais:</h5>
-            <h6>Telefones</h6>
+            <h6> <b>Telefones:</b></h6>
             {% for tel in assistido.telefones.all %}
                 <p>{{ tel.numero_telefone|format_telefone }}{% if tel.obs_telefone %} <small class="text-muted">- {{ tel.obs_telefone}}</small>{% endif %}</p>
                 {% empty %}
                 <p class="text-muted">Nenhum telefone cadastrado.</p>
             {% endfor %}
             <div class="d-flex align-items-center mb-2">
-                    <h6 class="mb-0 me-2">Irmãos:</h6>
+                    <h6 class="mb-0 me-2"><b>Irmãos:</b></h6>
                     <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#addIrmaoModal">
                             <i class="bi bi-person-plus"></i> Adicionar
                     </button>
@@ -288,7 +289,7 @@
                     <p>
                         <a href="{% url 'assistido:detalhe' irmao.id_assist %}" target="_blank">
                             {{ irmao.nmcompleto_assist }}
-                            <i class="bi bi-person-lines-fill"></i>
+                            <span class="badge text-bg-primary ms-2">{{ irmao.numero_assist }}/{{ irmao.DTCADASTRO|date:'y' }}</span>
                         </a>
                     </p>
                 {% endfor %}
@@ -598,3 +599,39 @@
     
 </main>
 {% endblock %}
+<script>
+// Helper para recuperar cookie (CSRF)
+function getCookie(name) {
+    var v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return v ? v.pop() : '';
+}
+
+function submitPostUrl(url) {
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = url;
+    var csrf = getCookie('csrftoken');
+    if (csrf) {
+        var inp = document.createElement('input');
+        inp.type = 'hidden';
+        inp.name = 'csrfmiddlewaretoken';
+        inp.value = csrf;
+        form.appendChild(inp);
+    }
+    document.body.appendChild(form);
+    form.submit();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var buttons = document.querySelectorAll('.btn-remove-irmao');
+    buttons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var url = btn.getAttribute('data-url');
+            if (!url) return;
+            // confirm dialog
+            if (!confirm('Remover relação de irmão?')) return;
+            submitPostUrl(url);
+        });
+    });
+});
+</script>
